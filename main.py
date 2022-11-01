@@ -1,24 +1,18 @@
 from flask import Flask, request, render_template
 from db import Database
 from datetime import datetime
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+
 app = Flask('sensors-db')
 
-@app.route("/request/", methods=["POST", "GET"])
-def request_site():
-    data = request.get_json(force=True)
+def generate_image(start, finish, num, path):
     db = Database('database.db')
-    db.insert('sensors', None, data['temperature'], data['humidity'], datetime.now().timestamp())
-    db.delete('sensors', f'timestamp < {datetime.now().timestamp() - 60*60*24}')
-    return "Nice"
-
-@app.route('/')
-def main_site():
-    db = Database('database.db')
-    result = db.fetch_all('temperature, humidity, timestamp', 'sensors').fetchall()
+    result = db.fetch('temperature, humidity, timestamp', 'sensors', f'timestamp>{start} and timestamp<{finish}').fetchall()
     result.sort(key=lambda x: x[2])
-    ref = datetime.now().timestamp()
+    ref = result[-1][2]
 
     def normalize_x(input, val):
         output = []
@@ -31,7 +25,7 @@ def main_site():
         output = []
         j = 0
         i = 0
-        while j < 100:
+        while j < num:
             if input[i][0] == j:
                 output.append((input[i][1], j))
                 i += 1
@@ -61,10 +55,40 @@ def main_site():
     plt.grid()
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
     plt.gcf().autofmt_xdate()
-    plt.savefig('static/img.jpg')
+    plt.ylim(ymin=0)
+    plt.savefig(path)
     plt.close()
+
+@app.route("/request/", methods=["POST", "GET"])
+def request_site():
+    data = request.get_json(force=True)
+    db = Database('database.db')
+    db.insert('sensors', None, data['temperature'], data['humidity'], datetime.now().timestamp())
+    db.delete('sensors', f'timestamp < {datetime.now().timestamp() - 60*60*24}')
+    return "Nice"
+
+@app.route("/render_image/", methods=["POST"])
+def render_image():
+    data = request.get_json(force=True)
+    print(data['start'], data['stop'], data['num'])
+    generate_image(data['start'], data['stop'], data['num'], 'static/img.jpg')
+    return "Nice"
+
+@app.route('/', methods=["POST"])
+def main_request():
+    print(request.form['start'])
+    start = datetime.strptime(request.form['start'], '%Y-%m-%dT%H:%M').timestamp()
+    finish = datetime.strptime(request.form['finish'], '%Y-%m-%dT%H:%M').timestamp()
+    generate_image(start, finish, int(request.form['num']), 'static/img.jpg')
+    
+    return render_template('template.html', image='static/img.jpg')
+
+@app.route('/')
+def main_site():
+    generate_image(datetime.now().timestamp()-60*60*2, datetime.now().timestamp(), 100, 'static/img.jpg')
     
     return render_template('template.html', image='static/img.jpg')
 
 if __name__ == '__main__':
     app.run(host='192.168.100.36', port=5000, debug=True, threaded=False)
+        

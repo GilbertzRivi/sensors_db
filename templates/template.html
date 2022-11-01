@@ -7,7 +7,39 @@
     <title>Document</title>
 </head>
 <body>
-    <img src="{{ image }}">
-    UwU
+    <img id="thimage" src="{{ image }}">
+    <form action='/', method='POST'>
+        <label for='start'>start</label>
+        <input type="datetime-local" id='start' name='start'></br>
+        <label for='finish'>finish</label>
+        <input type="datetime-local" id='finish' name='finish'></br>
+        <label for="num">num</label>
+        <input type="number" id="num" name="num"></br>
+        <input type="submit">
+
+    <script>
+        var newImage = new Image();
+        newImage.src = "{{ image }}";
+
+        function updateImage()
+        {
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "render_image", true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            let curr_time = new Date().getTime();
+            xhr.send(JSON.stringify({
+                start: (curr_time/1000) - (60*60*2),
+                stop: (curr_time/1000),
+                num: 100,
+            }));
+
+            document.getElementById("thimage").src = newImage.src;
+            newImage = new Image();
+            newImage.src = "{{ image }}?time=" + new Date().getTime();
+        }
+        setInterval(updateImage, 30000)
+
+    </script>
+
 </body>
 </html>
