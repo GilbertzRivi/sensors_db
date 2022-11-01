@@ -33,7 +33,6 @@ def generate_image(start, finish, num, path):
             elif input[i][0] < j:
                 i += 1
             elif j < input[i][0]:
-                output.append((0, j))
                 j += 1
 
         return output
@@ -70,24 +69,24 @@ def request_site():
 @app.route("/render_image/", methods=["POST"])
 def render_image():
     data = request.get_json(force=True)
-    print(data['start'], data['stop'], data['num'])
-    generate_image(data['start'], data['stop'], data['num'], 'static/img.jpg')
+    num = (int(data['finish']) - int(data['start']))/60
+    generate_image(data['start'], data['finish'], num, 'static/img.jpg')
     return "Nice"
 
 @app.route('/', methods=["POST"])
 def main_request():
-    print(request.form['start'])
     start = datetime.strptime(request.form['start'], '%Y-%m-%dT%H:%M').timestamp()
     finish = datetime.strptime(request.form['finish'], '%Y-%m-%dT%H:%M').timestamp()
-    generate_image(start, finish, int(request.form['num']), 'static/img.jpg')
+    num = (finish-start)/60
+    generate_image(start, finish, num, 'static/img.jpg')
     
-    return render_template('template.html', image='static/img.jpg')
+    return render_template('template.html', image='static/img.jpg', dynamicrefresh=0)
 
 @app.route('/')
 def main_site():
     generate_image(datetime.now().timestamp()-60*60*2, datetime.now().timestamp(), 100, 'static/img.jpg')
     
-    return render_template('template.html', image='static/img.jpg')
+    return render_template('template.html', image='static/img.jpg', dynamicrefresh=1)
 
 if __name__ == '__main__':
     app.run(host='192.168.100.36', port=5000, debug=True, threaded=False)
