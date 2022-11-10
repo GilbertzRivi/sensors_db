@@ -9,10 +9,6 @@ import matplotlib.dates as mdates
 app = Flask('sensors-db')
 
 def generate_image(start, finish, num, path):
-    db = Database('database.db')
-    result = db.fetch('temperature, humidity, timestamp', 'sensors', f'timestamp>{start} and timestamp<{finish}').fetchall()
-    result.sort(key=lambda x: x[2])
-    ref = result[-1][2]
 
     def normalize_x(input, val):
         output = []
@@ -20,35 +16,35 @@ def generate_image(start, finish, num, path):
             x = int(((ref - i[2])/60))
             y = int(i[val])
             output.append((x, y))
-            
-        input = output[::-1 ]
-        output = []
-        j = 0
-        i = 0
-        while j < num:
-            if input[i][0] == j:
-                output.append((input[i][1], j))
-                i += 1
-                j += 1
-            elif input[i][0] < j:
-                i += 1
-            elif j < input[i][0]:
-                j += 1
 
-        return output
+        return output[::-1 ]
+    db = Database('database.db')
+    result = db.fetch('temperature, humidity, timestamp', 'sensors', f'timestamp>{start} and timestamp<{finish}').fetchall()
+    result.sort(key=lambda x: x[2])
+    no_data = False
+    try:
+        ref = result[-1][2]
+    except IndexError:
+        no_data = True
 
-    values_h = normalize_x(result, 1)
-    y_h = [i[0] for i in values_h]
-    x_h = [i[1] for i in values_h]
+    if not no_data:
+        values_h = normalize_x(result, 1)
+        y_h = [i[1] for i in values_h]
+        x_h = [i[0] for i in values_h]
 
-    x_h = [datetime.fromtimestamp(ref-(60*i)) for i in x_h]
-    plt.plot(x_h,y_h, color='b')
+        x_h = [datetime.fromtimestamp(ref-(60*i)) for i in x_h]
+        plt.plot(x_h,y_h, color='b')
 
-    values_t = normalize_x(result, 0)
-    y_t = [i[0] for i in values_t]
-    x_t = [i[1] for i in values_t]
+        values_t = normalize_x(result, 0)
+        y_t = [i[1] for i in values_t]
+        x_t = [i[0] for i in values_t]
 
-    x_t = [datetime.fromtimestamp(ref-(60*i)) for i in x_t]
+        x_t = [datetime.fromtimestamp(ref-(60*i)) for i in x_t]
+    else:
+        x_h = 0
+        y_h = 0
+        x_t = 0
+        y_t = 0
 
     plt.plot(x_t,y_t, color='r')
     plt.grid()
@@ -89,5 +85,5 @@ def main_site():
     return render_template('template.html', image='static/img.jpg', dynamicrefresh=1)
 
 if __name__ == '__main__':
-    app.run(host='192.168.100.36', port=5000, debug=True, threaded=False)
+    app.run(host='192.168.1.107', port=5000, debug=True, threaded=False)
         
