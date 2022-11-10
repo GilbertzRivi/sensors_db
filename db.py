@@ -39,3 +39,11 @@ if __name__ == '__main__':
         humidity INTEGER,
         timestamp INTEGER);
         """)
+    db.create_table("""CREATE TABLE IF NOT EXISTS pc (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        cpu_load INTEGER,
+        cpu_temp INTEGER,
+        gpu_load INTEGER,
+        memory INTEGER,
+        timestamp INTEGER);
+        """)

@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}">
     <title>Document</title>
 </head>
 <body>
     <img id="thimage" src="{{ image }}">
+    <img id="pcimage" src="{{ image_pc }}">
     <form action='/', method='POST'>
         <label for='start'>start</label>
         <input type="datetime-local" id='start' name='start'></br>
@@ -15,6 +17,7 @@
         <input type="datetime-local" id='finish' name='finish'></br>
         <input type="submit">
     </form>
+    
 
     <script>
         var newImage = new Image();
@@ -37,6 +40,9 @@
             newImage = new Image();
             newImage.src = "{{ image }}?time=" + new Date().getTime();
             document.getElementById("thimage").src = newImage.src;
+            newImagePC = new Image();
+            newImagePC.src = "{{ image_pc }}?time=" + new Date().getTime();
+            document.getElementById("pcimage").src = newImagePC.src;
         }
         setInterval(updateImage, 30000)
 
