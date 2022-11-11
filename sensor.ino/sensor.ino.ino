@@ -7,7 +7,7 @@ DHT dht(5, DHT11);
 
 void setup() {
   Serial.begin(9600);
-  WiFi.begin("ssid", "passwd");
+  WiFi.begin("Matka Boska", "Zbawienie420");
 
   while (WiFi.status() != WL_CONNECTED) {
  
@@ -33,7 +33,7 @@ void loop() {
  
     HTTPClient http;
  
-    http.begin(wifi, "http://192.168.2.211:5000/request/");
+    http.begin(wifi, "http://192.168.2.11:5000/request/");
     http.addHeader("Content-Type", "text/plain");
  
     int httpCode = http.POST("{\"temperature\":\"" + String(t) + "\",\"humidity\":\"" + String(h) + "\"}");

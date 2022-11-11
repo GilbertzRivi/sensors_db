@@ -22,5 +22,5 @@ while True:
         "memory": memory,
     }
 
-    requests.post(url="http://192.168.2.211:5000/pc_request", json=data)
+    requests.post(url="http://192.168.2.11:5000/pc_request", json=data)
     sleep(30)

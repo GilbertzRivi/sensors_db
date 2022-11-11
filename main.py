@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
 app = Flask('sensors-db')
+bg_color = "#373737"
+plt.rcParams['axes.facecolor'] = bg_color
 
 def generate_image_sensor(start, finish, path):
 
@@ -51,6 +53,7 @@ def generate_image_sensor(start, finish, path):
     plt.legend()
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
     plt.gcf().autofmt_xdate()
+    plt.gcf().set_facecolor(bg_color)
     plt.ylim(ymin=0)
     plt.savefig(path)
     plt.close()
@@ -118,6 +121,7 @@ def generate_image_pc(start, finish, path):
     plt.legend()
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
     plt.gcf().autofmt_xdate()
+    plt.gcf().set_facecolor(bg_color)
     plt.ylim(ymin=0)
     plt.savefig(path)
     plt.close()
